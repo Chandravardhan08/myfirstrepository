@@ -175,23 +175,6 @@ img,video,audio{
   object-fit:contain;
 }
 
-/* CAMERA */
-video, canvas {
-      width: 320px;
-      height: 240px;
-      border: 1px solid #ccc;
-      margin: 5px;
-    }
-/* CANVAS */
-canvas{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  z-index:1;
-}
-
 /* MOBILE OPTIMIZATION */
 @media(max-width:600px){
   button{
@@ -438,7 +421,6 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
 <button onclick="show('music')">Music</button>
 <button onclick="show('docs')">Docs</button>
 <button onclick="show('online')">online</button>
-<button onclick="show('camera')">Camera</button>
 <button onclick="show('trash')">Trash</button>
 
 
@@ -603,124 +585,6 @@ indexedDB.deleteDatabase("album");
 location.reload();
 }
 }
-
-/* CAMERA */
-const cameraFeed = document.getElementById('cameraFeed');
-const snapshot = document.getElementById('snapshot');
-const startCameraBtn = document.getElementById('startCamera');
-const takePhotoBtn = document.getElementById('takePhoto');
-const startRecordingBtn = document.getElementById('startRecording');
-const stopRecordingBtn = document.getElementById('stopRecording');
-const recordedVideo = document.getElementById('recordedVideo');
-
-let mediaStream = null;
-let mediaRecorder = null;
-let recordedChunks = [];
-
-// Start Camera
-startCameraBtn.onclick = async () => {
-  try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true
-    });
-    cameraFeed.srcObject = mediaStream;
-  } catch (err) {
-    alert("Error accessing camera: " + err.message);
-  }
-};
-
-// Take Photo
-takePhotoBtn.onclick = async () => {
-  if (!mediaStream) {
-    alert("Please start the camera first!");
-    return;
-  }
-
-  const video = cameraFeed;
-  snapshot.width = video.videoWidth;
-  snapshot.height = video.videoHeight;
-
-  const context = snapshot.getContext('2d');
-  context.drawImage(video, 0, 0, snapshot.width, snapshot.height);
-
-  snapshot.toBlob(async (blob) => {
-    const name = prompt("Enter photo name:", "photo_" + Date.now());
-    if (!name) return;
-
-    const deleteTime = prompt(
-      "Enter auto-delete time (YYYY-MM-DD HH:MM) or leave blank:",
-      ""
-    ) || "";
-
-    db.transaction("media", "readwrite")
-      .objectStore("media")
-      .put({
-        id: Date.now() + Math.random(),
-        blob: blob,
-        type: "image",
-        name: name.toLowerCase(),
-        deleted: false,
-        deleteTime: deleteTime
-      });
-
-    load();
-    alert("Photo saved successfully!");
-  }, "image/png");
-};
-
-// Start Recording
-startRecordingBtn.onclick = () => {
-  if (!mediaStream) {
-    alert("Please start the camera first!");
-    return;
-  }
-
-  recordedChunks = [];
-  mediaRecorder = new MediaRecorder(mediaStream);
-
-  mediaRecorder.ondataavailable = e => {
-    if (e.data.size > 0) recordedChunks.push(e.data);
-  };
-
-  mediaRecorder.onstop = () => {
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    recordedVideo.src = URL.createObjectURL(blob);
-
-    const name = prompt("Enter video name:", "video_" + Date.now());
-    if (!name) return;
-
-    const deleteTime = prompt(
-      "Enter auto-delete time (YYYY-MM-DD HH:MM) or leave blank:",
-      ""
-    ) || "";
-
-    db.transaction("media", "readwrite")
-      .objectStore("media")
-      .put({
-        id: Date.now() + Math.random(),
-        blob: blob,
-        type: "video",
-        name: name.toLowerCase(),
-        deleted: false,
-        deleteTime: deleteTime
-      });
-
-    load();
-    alert("Video saved successfully!");
-  };
-
-  mediaRecorder.start();
-  alert("Recording started!");
-};
-
-// Stop Recording
-stopRecordingBtn.onclick = () => {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    mediaRecorder.stop();
-    alert("Recording stopped!");
-  }
-};
 /* DB */
 let req=indexedDB.open("album",1);
 req.onupgradeneeded=e=>e.target.result.createObjectStore("media",{keyPath:"id"});
