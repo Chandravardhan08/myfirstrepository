@@ -175,6 +175,45 @@ img,video,audio{
   object-fit:contain;
 }
 
+/* CAMERA */
+video, canvas {
+      width: 320px;
+      height: 240px;
+      border: 1px solid #ccc;
+      margin: 5px;
+    }
+#camera {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+  color: white;
+}
+#cameraFeed, #recordedVideo, #snapshot {
+  position: static;
+  width: min(100%, 640px);
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: #050505;
+  border: 1px solid rgba(56,189,248,.6);
+  border-radius: 12px;
+  margin: 10px auto;
+  z-index: auto;
+}
+#snapshot, #recordedVideo { display: none; }
+#cameraStatus { min-height: 24px; margin: 8px; color: #bae6fd; }
+#camera button:disabled { opacity: .45; cursor: not-allowed; }
+/* CANVAS */
+canvas{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+}
+#particlesCanvas { pointer-events: none; }
+
 /* MOBILE OPTIMIZATION */
 @media(max-width:600px){
   button{
@@ -327,10 +366,571 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
     font-weight:bold;
 }
 
+/* MODERN VISUAL REFRESH */
+:root {
+  --bg: #050816;
+  --surface: rgba(11, 18, 38, 0.78);
+  --surface-strong: rgba(8, 14, 30, 0.94);
+  --line: rgba(148, 163, 184, 0.18);
+  --text: #f8fafc;
+  --muted: #a8b3c7;
+  --primary: #22d3ee;
+  --primary-strong: #0891b2;
+  --accent: #8b5cf6;
+  --danger: #fb7185;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+* { box-sizing: border-box; }
+
+html { min-height: 100%; background: var(--bg); }
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 15% 15%, rgba(34, 211, 238, 0.15), transparent 30%),
+    radial-gradient(circle at 85% 80%, rgba(139, 92, 246, 0.16), transparent 32%),
+    var(--bg);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(3, 7, 18, 0.3), rgba(3, 7, 18, 0.82));
+}
+
+.video-background { opacity: 0.34; filter: saturate(0.75) contrast(1.15); }
+#bg-video { border-radius: 0; }
+
+.content {
+  padding: 42px 20px 16px;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.65);
+}
+
+.content h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+  background: linear-gradient(90deg, #fff 10%, #67e8f9 55%, #c4b5fd);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.content p { margin: 12px 0 0; color: #cbd5e1; font-size: 1rem; }
+
+.section {
+  width: min(1100px, calc(100% - 32px));
+  margin: 18px auto 48px;
+  padding: clamp(18px, 4vw, 34px);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+#login, #signup { max-width: 470px; }
+
+.box {
+  width: 100%;
+  max-width: 430px;
+  padding: 8px;
+  background: transparent;
+}
+
+label {
+  display: block;
+  margin: 12px 4px 3px;
+  color: #dbeafe;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+input, select {
+  width: 100%;
+  margin: 7px 0;
+  padding: 13px 14px;
+  color: var(--text);
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 12px;
+  outline: none;
+  font: inherit;
+  transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+
+input::placeholder { color: #7f8ca3; }
+input:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.13);
+}
+
+select option { color: #111827; }
+
+button {
+  min-height: 42px;
+  padding: 10px 16px;
+  margin: 6px 4px;
+  color: #06111c;
+  background: linear-gradient(135deg, #67e8f9, #22d3ee);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(8, 145, 178, 0.2);
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  transition: transform .18s, box-shadow .18s, filter .18s;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+  box-shadow: 0 12px 28px rgba(34, 211, 238, 0.27);
+}
+
+button:active:not(:disabled) { transform: translateY(0); }
+button:focus-visible { outline: 3px solid rgba(196, 181, 253, 0.8); outline-offset: 2px; }
+button:disabled { opacity: 0.42; cursor: not-allowed; box-shadow: none; }
+
+#dash {
+  max-width: 820px;
+  padding-top: 34px;
+  display: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+#dash[style*="block"] { display: grid !important; }
+#dash br { display: none; }
+#dash button {
+  min-height: 92px;
+  margin: 0;
+  color: var(--text);
+  background: linear-gradient(145deg, rgba(30, 41, 69, 0.95), rgba(15, 23, 42, 0.88));
+  border-color: rgba(103, 232, 249, 0.18);
+  box-shadow: none;
+  font-size: 1rem;
+}
+#dash button:hover { border-color: var(--primary); background: rgba(8, 145, 178, 0.2); }
+
+.preview {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 18px;
+  padding: 22px 0 0;
+}
+
+.preview > div {
+  min-width: 0;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.preview p { margin: 5px 4px 12px; color: #e2e8f0; font-weight: 750; overflow-wrap: anywhere; }
+.preview img, .preview video { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.preview audio { width: 100%; }
+
+#camera { background: var(--surface); }
+#cameraFeed, #recordedVideo, #snapshot {
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+#menu {
+  gap: 4px;
+  width: min(220px, calc(100vw - 30px));
+  padding: 10px;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+#menu button { width: 100%; margin: 0; }
+
+#profilePic {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  background: #0f172a;
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12), 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.help-card {
+  max-width: none;
+  margin: 0;
+  padding: 8px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.cmd-table { overflow: hidden; border-radius: 12px; }
+.cmd-table th { color: #67e8f9; }
+.cmd-table tr:hover td { background: rgba(34, 211, 238, 0.06); }
+
+#viewer { background: rgba(2, 6, 23, 0.96); backdrop-filter: blur(14px); }
+#viewerContent {
+  display: flex;
+  width: min(1000px, 94vw);
+  height: min(820px, 88vh);
+  align-items: center;
+  justify-content: center;
+}
+.document-frame {
+  width: 100%;
+  height: 100%;
+  background: white;
+  border: 0;
+  border-radius: 16px;
+}
+.document-text-view {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 24px;
+  overflow: auto;
+  color: #111827;
+  background: white;
+  border-radius: 16px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.document-fallback {
+  width: min(500px, 100%);
+  padding: 30px;
+  color: var(--text);
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.document-fallback p { color: var(--muted); line-height: 1.6; }
+.success, .error { margin-top: 18px; padding: 16px; border-radius: 14px; }
+
+/* DASHBOARD FEATURE CARDS */
+#dash { max-width: 980px; gap: 18px; }
+
+.dashboard-heading {
+  grid-column: 1 / -1;
+  margin-bottom: 10px;
+  text-align: left;
+}
+.dashboard-kicker {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #67e8f9;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .2em;
+}
+.dashboard-heading h2 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+.dashboard-heading p { margin: 10px 0 0; color: var(--muted); }
+
+#dash button {
+  position: relative;
+  min-height: 190px;
+  padding: 24px 20px 20px;
+  overflow: hidden;
+  isolation: isolate;
+  text-align: left;
+  background:
+    radial-gradient(circle at 90% 10%, var(--card-glow), transparent 44%),
+    linear-gradient(145deg, rgba(30, 41, 69, .98), rgba(9, 15, 32, .96));
+  border-color: rgba(255, 255, 255, .1);
+  box-shadow: 0 22px 42px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+#dash button::before {
+  content: var(--card-icon);
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 22px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--card-color), var(--card-dark));
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 17px;
+  box-shadow: 0 14px 30px var(--card-shadow);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+#dash button::after {
+  content: "";
+  position: absolute;
+  right: -35px;
+  bottom: -55px;
+  z-index: -1;
+  width: 140px;
+  height: 140px;
+  background: var(--card-glow);
+  border-radius: 50%;
+  filter: blur(15px);
+}
+#dash button span, #dash button small { display: block; }
+#dash button span { margin-bottom: 7px; font-size: 1.12rem; font-weight: 850; }
+#dash button small { color: var(--muted); font-size: .78rem; font-weight: 600; }
+#dash button:hover {
+  border-color: var(--card-color);
+  background:
+    radial-gradient(circle at 90% 10%, var(--card-glow), transparent 50%),
+    linear-gradient(145deg, rgba(35, 47, 78, .98), rgba(12, 19, 40, .96));
+  transform: translateY(-7px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, .43), 0 10px 32px var(--card-shadow);
+}
+
+#dash button:nth-of-type(1) { --card-icon: "\1F5BC"; --card-color: #22d3ee; --card-dark: #0284c7; --card-glow: rgba(34,211,238,.25); --card-shadow: rgba(34,211,238,.28); }
+#dash button:nth-of-type(2) { --card-icon: "\25B6"; --card-color: #8b5cf6; --card-dark: #6d28d9; --card-glow: rgba(139,92,246,.26); --card-shadow: rgba(139,92,246,.3); }
+#dash button:nth-of-type(3) { --card-icon: "\266B"; --card-color: #ec4899; --card-dark: #be185d; --card-glow: rgba(236,72,153,.24); --card-shadow: rgba(236,72,153,.28); }
+#dash button:nth-of-type(4) { --card-icon: "\2261"; --card-color: #f59e0b; --card-dark: #d97706; --card-glow: rgba(245,158,11,.24); --card-shadow: rgba(245,158,11,.27); }
+#dash button:nth-of-type(5) { --card-icon: "\2601"; --card-color: #14b8a6; --card-dark: #0f766e; --card-glow: rgba(20,184,166,.24); --card-shadow: rgba(20,184,166,.27); }
+#dash button:nth-of-type(6) { --card-icon: "\25C9"; --card-color: #3b82f6; --card-dark: #1d4ed8; --card-glow: rgba(59,130,246,.26); --card-shadow: rgba(59,130,246,.3); }
+#dash button:nth-of-type(7) { --card-icon: "\2715"; --card-color: #fb7185; --card-dark: #e11d48; --card-glow: rgba(251,113,133,.24); --card-shadow: rgba(251,113,133,.27); }
+
+/* MATCHING SECTION CARDS */
+.section-heading {
+  --section-color: #22d3ee;
+  --section-dark: #0284c7;
+  --section-glow: rgba(34, 211, 238, .24);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 18px 0 22px;
+  padding: 22px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 95% 5%, var(--section-glow), transparent 42%),
+    linear-gradient(145deg, rgba(30, 41, 69, .97), rgba(9, 15, 32, .95));
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+.section-icon {
+  display: grid;
+  flex: 0 0 62px;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  color: white;
+  background: linear-gradient(135deg, var(--section-color), var(--section-dark));
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 18px;
+  box-shadow: 0 14px 30px var(--section-glow);
+  font-size: 1.65rem;
+}
+.section-heading div > span {
+  color: var(--section-color);
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+.section-heading h2 { margin: 4px 0 5px; font-size: clamp(1.45rem, 4vw, 2rem); }
+.section-heading p { margin: 0; color: var(--muted); font-size: .88rem; }
+.tone-purple { --section-color: #a78bfa; --section-dark: #6d28d9; --section-glow: rgba(139, 92, 246, .27); }
+.tone-pink { --section-color: #f472b6; --section-dark: #be185d; --section-glow: rgba(236, 72, 153, .25); }
+.tone-amber { --section-color: #fbbf24; --section-dark: #d97706; --section-glow: rgba(245, 158, 11, .25); }
+.tone-teal { --section-color: #2dd4bf; --section-dark: #0f766e; --section-glow: rgba(20, 184, 166, .25); }
+.tone-blue { --section-color: #60a5fa; --section-dark: #1d4ed8; --section-glow: rgba(59, 130, 246, .27); }
+.tone-red { --section-color: #fb7185; --section-dark: #e11d48; --section-glow: rgba(251, 113, 133, .25); }
+
+.section > input[type="file"] {
+  padding: 16px;
+  color: var(--muted);
+  background: rgba(15, 23, 42, .62);
+  border: 1px dashed rgba(103, 232, 249, .4);
+  border-radius: 16px;
+  cursor: pointer;
+}
+.section > input[type="file"]::file-selector-button {
+  margin-right: 14px;
+  padding: 10px 15px;
+  color: #06111c;
+  background: linear-gradient(135deg, #67e8f9, #22d3ee);
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.tool-card, button.tool-card {
+  display: flex;
+  min-height: 130px;
+  margin: 0;
+  padding: 22px;
+  flex-direction: column;
+  justify-content: flex-end;
+  text-align: left;
+  text-decoration: none;
+  color: white;
+  background: linear-gradient(145deg, rgba(30, 41, 69, .96), rgba(10, 16, 34, .94));
+  border: 1px solid rgba(45, 212, 191, .22);
+  border-radius: 18px;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, .28);
+  transition: transform .18s, border-color .18s, box-shadow .18s;
+}
+.tool-card:hover {
+  transform: translateY(-5px);
+  border-color: #2dd4bf;
+  box-shadow: 0 25px 45px rgba(0, 0, 0, .38), 0 8px 25px rgba(20, 184, 166, .16);
+}
+.tool-card strong { font-size: 1.08rem; }
+.tool-card small { margin-top: 7px; color: var(--muted); }
+
+#voiceHelp .help-card > h1, #voiceHelp .help-card > .desc,
+#locator .container > .logo, #locator .container > h2 { display: none; }
+#locator .container { padding: 8px 2px 12px; }
+#camera .section-heading { text-align: left; }
+
+.upload-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(2, 6, 23, .82);
+  backdrop-filter: blur(14px);
+}
+.upload-modal.open { display: flex; }
+.upload-card {
+  width: min(470px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  padding: 28px;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 90% 5%, rgba(34, 211, 238, .2), transparent 38%),
+    var(--surface-strong);
+  border: 1px solid rgba(103, 232, 249, .22);
+  border-radius: 24px;
+  box-shadow: 0 35px 90px rgba(0, 0, 0, .58), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+.upload-card-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 18px;
+  color: #06111c;
+  background: linear-gradient(135deg, #67e8f9, #22d3ee);
+  border-radius: 16px;
+  box-shadow: 0 14px 30px rgba(34, 211, 238, .28);
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+.upload-card h2 { margin: 3px 0 8px; }
+.upload-card > p { color: var(--muted); }
+.upload-card .upload-note { margin: 5px 2px 14px; font-size: .78rem; }
+.upload-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.upload-actions button { margin: 0; }
+#cancelUpload { color: var(--text); background: rgba(51, 65, 85, .8); box-shadow: none; }
+
+.favorite-filter {
+  color: #ffe4e6;
+  background: linear-gradient(135deg, rgba(190, 24, 93, .92), rgba(225, 29, 72, .9));
+  box-shadow: 0 10px 28px rgba(225, 29, 72, .2);
+}
+.favorite-filter.active {
+  color: #4c0519;
+  background: linear-gradient(135deg, #fda4af, #fb7185);
+}
+.favorite-button {
+  color: #fff1f2;
+  background: rgba(190, 24, 93, .72);
+  box-shadow: none;
+}
+.favorite-button.active {
+  color: #4c0519;
+  background: linear-gradient(135deg, #fda4af, #fb7185);
+}
+
+.music-control-card {
+  margin: 18px 0;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 95% 5%, rgba(236, 72, 153, .2), transparent 38%),
+    rgba(15, 23, 42, .8);
+  border: 1px solid rgba(244, 114, 182, .2);
+  border-radius: 20px;
+  box-shadow: 0 20px 42px rgba(0, 0, 0, .28);
+}
+.music-control-row {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.music-control-row button { margin: 0; }
+.music-control-row label {
+  min-width: 125px;
+  margin: 0;
+  color: var(--muted);
+}
+.music-control-row select {
+  min-width: 120px;
+  margin: 5px 0 0;
+  padding: 10px;
+}
+#sleepTimerStatus { margin: 7px 2px 0; color: #f9a8d4; font-size: .84rem; }
+
+@media (max-width: 700px) {
+  .content { padding-top: 28px; }
+  .content h1 { font-size: clamp(2rem, 12vw, 3rem); }
+  .section { width: calc(100% - 20px); margin-top: 12px; border-radius: 19px; }
+  #dash { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #dash button { width: auto; min-height: 175px; }
+  .section > button { width: auto; }
+  .preview { grid-template-columns: 1fr; }
+  .cmd-table { display: block; overflow-x: auto; }
+  .tool-grid { grid-template-columns: 1fr; }
+  .section-heading { padding: 17px; gap: 13px; }
+  .section-icon { flex-basis: 52px; width: 52px; height: 52px; border-radius: 15px; }
+  .music-control-row > button { width: auto; }
+  .music-control-row label { flex: 1 1 130px; }
+}
+
+@media (max-width: 430px) {
+  #dash { grid-template-columns: 1fr; }
+  #dash button { min-height: 150px; }
+  #dash button::before { width: 52px; height: 52px; margin-bottom: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation-duration: .01ms !important; }
+  #bg-video { display: none; }
+}
+
 </style>
 </head>
 
-<body onclick="unlockAudio()">
 
 <canvas id="particlesCanvas"></canvas>
 
@@ -345,7 +945,25 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
 </div>
 
 <div id="viewer" onclick="closeViewer()">
-<div id="viewerContent"></div>
+<div id="viewerContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<div id="uploadModal" class="upload-modal" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
+  <div class="upload-card">
+    <div class="upload-card-icon">+</div>
+    <span class="dashboard-kicker">ADD TO ALBUM</span>
+    <h2 id="uploadTitle">Save selected file</h2>
+    <p id="uploadSummary">Choose a name and optional deletion time.</p>
+    <label for="uploadName">File name</label>
+    <input id="uploadName" type="text" autocomplete="off">
+    <label for="uploadDeleteTime">Auto-delete date and time (optional)</label>
+    <input id="uploadDeleteTime" type="datetime-local">
+    <p class="upload-note">Leave the date empty to keep the file until you delete it.</p>
+    <div class="upload-actions">
+      <button type="button" id="cancelUpload">Cancel</button>
+      <button type="button" id="confirmUpload">Save to Album</button>
+    </div>
+  </div>
 </div>
 
 <!-- LOGIN -->
@@ -377,20 +995,18 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
 </div>
 <div id="online" class="section" style="display: none;">
   <button onclick="show('dash')">Back</button>
-  <br>
-  <br>
-  <a href="https://www.5movierulz.army/" target="_blank">
-    <button>MOVIES</button>
-  </a>
-  <a href="https://animelok.xyz/languages/telugu" target="_blank">
-  <button>ANIME</button>
-  </a>
-    <a href="https://chandravardhan08.github.io/candycrush/" target="_blank"><button>candy game</button></a>
-  <button onclick="show('locator')">LOCATION</button>
+  <div class="section-heading tone-teal"><span class="section-icon">&#9729;</span><div><span>DISCOVER</span><h2>Online Space</h2><p>Entertainment and useful tools</p></div></div>
+  <div class="tool-grid">
+    <a class="tool-card" href="https://www.5movierulz.army/" target="_blank"><strong>Movies</strong><small>Browse entertainment</small></a>
+    <a class="tool-card" href="https://animelok.xyz/languages/telugu" target="_blank"><strong>Anime</strong><small>Explore anime shows</small></a>
+    <a class="tool-card" href="https://chandravardhan08.github.io/candycrush/" target="_blank"><strong>Candy Game</strong><small>Play a quick game</small></a>
+    <button class="tool-card" onclick="show('locator')"><strong>Location</strong><small>Find your live address</small></button>
+  </div>
 </div>
 <div id="locator" class="section">
 
 <button onclick="show('online')">Back</button>
+<div class="section-heading tone-blue"><span class="section-icon">&#9673;</span><div><span>LIVE TOOL</span><h2>Address Locator</h2><p>Find your current location safely</p></div></div>
 
 <div class="container">
 
@@ -415,17 +1031,24 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
 </div>
 <!-- DASH -->
 <div id="dash" class="section">
+  <div class="dashboard-heading">
+    <span class="dashboard-kicker">YOUR PRIVATE SPACE</span>
+    <h2>Smart Album</h2>
+    <p>Choose a collection or open a tool</p>
+  </div>
   <br><br><br><br>
-<button onclick="show('images')">Images</button>
-<button onclick="show('videos')">Videos</button>
-<button onclick="show('music')">Music</button>
-<button onclick="show('docs')">Docs</button>
-<button onclick="show('online')">online</button>
-<button onclick="show('trash')">Trash</button>
+<button onclick="show('images')"><span>Images</span><small>Browse your photos</small></button>
+<button onclick="show('videos')"><span>Videos</span><small>Watch saved moments</small></button>
+<button onclick="show('music')"><span>Music</span><small>Play your audio</small></button>
+<button onclick="show('docs')"><span>Documents</span><small>Open saved files</small></button>
+<button onclick="show('online')"><span>Online</span><small>Explore your links</small></button>
+<button onclick="show('camera')"><span>Camera</span><small>Capture something new</small></button>
+<button onclick="show('trash')"><span>Trash</span><small>Restore deleted items</small></button>
 
 
 </div>
 <div id="voiceHelp" class="section">
+    <div class="section-heading tone-purple"><span class="section-icon">&#9835;</span><div><span>HANDS FREE</span><h2>Voice Commands</h2><p>Control your album using simple phrases</p></div></div>
     <div class="help-card">
         <h1>Voice Command System</h1>
             <p class="desc">The system is listening for the following keywords</p>
@@ -493,77 +1116,101 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
         </div>
     </div>
 <!-- SECTIONS -->
-<div id="images" class="section"><button onclick="show('dash')">Back</button><input type="file" multiple accept="image/*" onchange="saveFile(this.files,'image')"><div id="imgPreview" class="preview"></div></div>
-<div id="videos" class="section"><button onclick="show('dash')">Back</button><input type="file" multiple accept="video/*" onchange="saveFile(this.files,'video')"><div id="vidPreview" class="preview"></div></div>
-<div id="music" class="section"><button onclick="show('dash')">Back</button><input type="file" multiple accept="audio/*" onchange="saveFile(this.files,'music')"><div id="musicPreview" class="preview"></div></div>
-<div id="docs" class="section"><button onclick="show('dash')">Back</button><input type="file" multiple onchange="saveFile(this.files,'doc')"><div id="docPreview" class="preview"></div></div>
+<div id="images" class="section"><button onclick="show('dash')">Back</button><div class="section-heading tone-cyan"><span class="section-icon">&#128444;</span><div><span>YOUR COLLECTION</span><h2>Images</h2><p>Keep your favorite photos together</p></div></div><input type="file" multiple accept="image/*" onchange="saveFile(this.files,'image',this)"><button class="favorite-filter" onclick="toggleFavoritesFilter('image',this)">Show Favorites Only</button><div id="imgPreview" class="preview"></div></div>
+<div id="videos" class="section"><button onclick="show('dash')">Back</button><div class="section-heading tone-purple"><span class="section-icon">&#9654;</span><div><span>YOUR COLLECTION</span><h2>Videos</h2><p>Replay your saved moments</p></div></div><input type="file" multiple accept="video/*" onchange="saveFile(this.files,'video',this)"><button class="favorite-filter" onclick="toggleFavoritesFilter('video',this)">Show Favorites Only</button><div id="vidPreview" class="preview"></div></div>
+<div id="music" class="section"><button onclick="show('dash')">Back</button><div class="section-heading tone-pink"><span class="section-icon">&#9835;</span><div><span>YOUR COLLECTION</span><h2>Music</h2><p>Listen to your favorite audio</p></div></div><input type="file" multiple accept="audio/*" onchange="saveFile(this.files,'music',this)"><div class="music-control-card"><div class="music-control-row"><button onclick="playRelativeTrack(-1)">Previous</button><button onclick="playRelativeTrack(1)">Next</button><button onclick="stopAll()">Stop</button><button id="shuffleButton" onclick="toggleMusicShuffle(this)">Shuffle: Off</button></div><div class="music-control-row"><label>Repeat<select id="repeatMode" onchange="setMusicRepeat(this.value)"><option value="off">Off</option><option value="all">All</option><option value="one">One song</option></select></label><label>Speed<select id="musicSpeed" onchange="setMusicSpeed(this.value)"><option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></label><label>Sleep timer<select id="sleepMinutes"><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">60 minutes</option></select></label><button onclick="startMusicSleepTimer()">Start Timer</button><button onclick="cancelMusicSleepTimer()">Cancel Timer</button></div><p id="sleepTimerStatus">Sleep timer is off.</p></div><button class="favorite-filter" onclick="toggleFavoritesFilter('music',this)">Show Favorites Only</button><div id="musicPreview" class="preview"></div></div>
+<div id="docs" class="section"><button onclick="show('dash')">Back</button><div class="section-heading tone-amber"><span class="section-icon">&#8801;</span><div><span>YOUR COLLECTION</span><h2>Documents</h2><p>Keep important files close</p></div></div><input type="file" multiple onchange="saveFile(this.files,'doc',this)"><button class="favorite-filter" onclick="toggleFavoritesFilter('doc',this)">Show Favorites Only</button><div id="docPreview" class="preview"></div></div>
 
 
 <!-- CAMERA -->
 <div id="camera" class="section" style="display: none;">
+  <button id="backFromCamera">Back</button>
+  <button id="stopCamera" disabled>Stop Camera</button>
+  <div class="section-heading tone-blue"><span class="section-icon">&#9673;</span><div><span>CAPTURE</span><h2>Camera Studio</h2><p>Take photos and record videos</p></div></div>
+  <p id="cameraStatus" role="status">Camera is off.</p>
   <video id="cameraFeed" autoplay playsinline></video>
   <canvas id="snapshot"></canvas>
   <br>
   <button id="startCamera">Start Camera</button>
-  <button id="takePhoto">Take Photo</button>
-  <button id="startRecording">Start Recording</button>
-  <button id="stopRecording">Stop Recording</button>
+  <button id="takePhoto" disabled>Take Photo</button>
+  <button id="startRecording" disabled>Start Recording</button>
+  <button id="stopRecording" disabled>Stop Recording</button>
   <br>
   <video id="recordedVideo" controls></video>
 </div>
 
 
-<div id="trash" class="section"><button onclick="show('dash')">Back</button><div id="trashPreview" class="preview"></div></div>
+<div id="trash" class="section"><button onclick="show('dash')">Back</button><div class="section-heading tone-red"><span class="section-icon">&#10005;</span><div><span>RECOVERY</span><h2>Trash</h2><p>Restore or permanently remove items</p></div></div><div id="trashPreview" class="preview"></div></div>
 
 <script>
-    window.addEventListener("resize",()=>{
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
-});
-let db,currentUser,currentAudio=null,currentVideo=null;
+const particlesCanvasEl = document.getElementById('particlesCanvas');
+const profilePicEl = document.getElementById('profilePic');
+const menuEl = document.getElementById('menu');
+const viewerEl = document.getElementById('viewer');
+const viewerContentEl = document.getElementById('viewerContent');
+
+function resizeParticlesCanvas() {
+  particlesCanvasEl.width = window.innerWidth;
+  particlesCanvasEl.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeParticlesCanvas);
+resizeParticlesCanvas();
+let db,currentUser,currentAudio=null,currentVideo=null,currentViewerObjectUrl=null;
+const favoriteFilters={image:false,video:false,music:false,doc:false};
+const musicSettings={repeat:'off',shuffle:false,speed:1};
+let musicSleepTimer=null;
 
 /* NAV */
 function show(id){
+if(id!=="camera" && typeof stopCamera==="function" && mediaStream) stopCamera();
 document.querySelectorAll(".section").forEach(s=>s.style.display="none");
-document.getElementById(id).style.display="block";
-if(id==="camera") startCam();
+const target=document.getElementById(id);
+if(!target){console.error('Unknown section:',id);return;}
+target.style.display="block";
+menuEl.style.display="none";
 }
 function goBack(){closeViewer();show("dash");}
 
 /* AUTH */
 function signup(){
-localStorage.setItem("user",JSON.stringify({email:newEmail.value,pass:btoa(newPass.value)}));
+const email=document.getElementById('newEmail').value.trim();
+const password=document.getElementById('newPass').value;
+if(!email || !password)return alert('Enter an email and password.');
+localStorage.setItem("user",JSON.stringify({email,pass:btoa(password)}));
 show("login");
 }
 function login(){
 let u=JSON.parse(localStorage.getItem("user"));
-if(u && u.email===loginEmail.value && u.pass===btoa(loginPass.value)){
+const email=document.getElementById('loginEmail').value.trim();
+const password=document.getElementById('loginPass').value;
+if(u && u.email===email && u.pass===btoa(password)){
 currentUser=u;
-profilePic.src=u.pic||"https://via.placeholder.com/50";
-profilePic.style.display="block";
+profilePicEl.src=u.pic||"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect width='50' height='50' rx='25' fill='%230891b2'/%3E%3Ctext x='25' y='31' text-anchor='middle' font-size='20' fill='white'%3EU%3C/text%3E%3C/svg%3E";
+profilePicEl.style.display="block";
 show("dash");
 startListening();
-startParticles();
 }else alert("Wrong login");
 }
-function logout(){location.reload();}
+function logout(){stopAll();stopCamera();location.reload();}
 
 /* PROFILE */
-profilePic.onclick=(e)=>{
+profilePicEl.onclick=(e)=>{
 e.stopPropagation();
-menu.style.display=menu.style.display==="flex"?"none":"flex";
+menuEl.style.display=menuEl.style.display==="flex"?"none":"flex";
 };
 document.addEventListener("click",(e)=>{
-if(!menu.contains(e.target)&&e.target!==profilePic) menu.style.display="none";
+if(!menuEl.contains(e.target)&&e.target!==profilePicEl) menuEl.style.display="none";
 });
 
-function showProfile(){alert(currentUser.email);}
+function showProfile(){if(currentUser)alert(currentUser.email);}
 function changeProfilePic(){
 let i=document.createElement("input");i.type="file";
+i.accept="image/*";
 i.onchange=()=>{
+if(!i.files || !i.files[0])return;
 let r=new FileReader();
 r.onload=e=>{
-profilePic.src=e.target.result;
+profilePicEl.src=e.target.result;
 currentUser.pic=e.target.result;
 localStorage.setItem("user",JSON.stringify(currentUser));
 };
@@ -573,10 +1220,13 @@ i.click();
 }
 function changePassword(){
 let old=prompt("Old password");
+if(old===null)return;
 if(btoa(old)!==currentUser.pass)return alert("Wrong");
 let np=prompt("New password");
+if(!np)return alert('Enter a new password.');
 currentUser.pass=btoa(np);
 localStorage.setItem("user",JSON.stringify(currentUser));
+alert('Password changed successfully.');
 }
 function deleteAccount(){
 if(confirm("Delete account?")){
@@ -585,45 +1235,370 @@ indexedDB.deleteDatabase("album");
 location.reload();
 }
 }
+
+/* CAMERA */
+const cameraFeed = document.getElementById('cameraFeed');
+const snapshot = document.getElementById('snapshot');
+const startCameraBtn = document.getElementById('startCamera');
+const takePhotoBtn = document.getElementById('takePhoto');
+const startRecordingBtn = document.getElementById('startRecording');
+const stopRecordingBtn = document.getElementById('stopRecording');
+const recordedVideo = document.getElementById('recordedVideo');
+const stopCameraBtn = document.getElementById('stopCamera');
+const backFromCameraBtn = document.getElementById('backFromCamera');
+const cameraStatus = document.getElementById('cameraStatus');
+
+let mediaStream = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+
+function setCameraStatus(message, isError = false) {
+  cameraStatus.textContent = message;
+  cameraStatus.style.color = isError ? '#fecaca' : '#bae6fd';
+}
+
+function updateCameraButtons() {
+  const running = !!mediaStream && mediaStream.active;
+  const recording = !!mediaRecorder && mediaRecorder.state === 'recording';
+  startCameraBtn.disabled = running;
+  stopCameraBtn.disabled = !running || recording;
+  takePhotoBtn.disabled = !running || recording;
+  startRecordingBtn.disabled = !running || recording || !window.MediaRecorder;
+  stopRecordingBtn.disabled = !recording;
+}
+
+function stopCamera() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+  if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+  cameraFeed.srcObject = null;
+  mediaStream = null;
+  setCameraStatus('Camera is off.');
+  updateCameraButtons();
+}
+
+function saveCameraMedia(blob, type, defaultName) {
+  const extension = type === 'image' ? '.png' : '.webm';
+  const file = new File([blob], defaultName + extension, { type: blob.type });
+  saveFile([file], type, null);
+}
+
+// Start Camera
+startCameraBtn.onclick = async () => {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Camera access requires HTTPS or localhost in a supported browser.');
+    }
+    stopCamera();
+    setCameraStatus('Requesting camera permission...');
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user' },
+      audio: false
+    });
+    cameraFeed.srcObject = mediaStream;
+    await cameraFeed.play();
+    setCameraStatus('Camera is ready.');
+    updateCameraButtons();
+  } catch (err) {
+    mediaStream = null;
+    setCameraStatus('Could not start camera: ' + err.message, true);
+    updateCameraButtons();
+  }
+};
+
+stopCameraBtn.onclick = stopCamera;
+backFromCameraBtn.onclick = () => { stopCamera(); show('dash'); };
+
+// Take Photo
+takePhotoBtn.onclick = async () => {
+  if (!mediaStream || !cameraFeed.videoWidth) {
+    alert("Please start the camera first!");
+    return;
+  }
+
+  const video = cameraFeed;
+  snapshot.width = video.videoWidth;
+  snapshot.height = video.videoHeight;
+
+  const context = snapshot.getContext('2d');
+  context.drawImage(video, 0, 0, snapshot.width, snapshot.height);
+  snapshot.style.display = 'block';
+
+  snapshot.toBlob(blob => {
+    if (blob) saveCameraMedia(blob, 'image', 'photo_' + Date.now());
+  }, 'image/png');
+};
+
+// Start Recording
+startRecordingBtn.onclick = () => {
+  if (!mediaStream) {
+    alert("Please start the camera first!");
+    return;
+  }
+
+  recordedChunks = [];
+  try {
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+      ? 'video/webm;codecs=vp8' : 'video/webm';
+    mediaRecorder = new MediaRecorder(mediaStream, { mimeType });
+  } catch (err) {
+    setCameraStatus('Recording is not supported by this browser.', true);
+    return;
+  }
+
+  mediaRecorder.ondataavailable = e => {
+    if (e.data.size > 0) recordedChunks.push(e.data);
+  };
+
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'video/webm' });
+    if (!blob.size) return;
+    if (recordedVideo.src) URL.revokeObjectURL(recordedVideo.src);
+    recordedVideo.src = URL.createObjectURL(blob);
+    recordedVideo.style.display = 'block';
+    saveCameraMedia(blob, 'video', 'video_' + Date.now());
+    setCameraStatus(mediaStream && mediaStream.active ? 'Camera is ready.' : 'Camera is off.');
+    updateCameraButtons();
+  };
+
+  mediaRecorder.start();
+  setCameraStatus('Recording...');
+  updateCameraButtons();
+};
+
+// Stop Recording
+stopRecordingBtn.onclick = () => {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+    setCameraStatus('Finishing recording...');
+    updateCameraButtons();
+  }
+};
+
+updateCameraButtons();
 /* DB */
 let req=indexedDB.open("album",1);
 req.onupgradeneeded=e=>e.target.result.createObjectStore("media",{keyPath:"id"});
 req.onsuccess=e=>{db=e.target.result;load();};
+req.onerror=()=>alert('Local album storage could not be opened. Check browser storage permissions.');
 
 /* SAVE */
+const uploadModal = document.getElementById('uploadModal');
+const uploadName = document.getElementById('uploadName');
+const uploadDeleteTime = document.getElementById('uploadDeleteTime');
+const uploadSummary = document.getElementById('uploadSummary');
+const confirmUploadBtn = document.getElementById('confirmUpload');
+const cancelUploadBtn = document.getElementById('cancelUpload');
+let pendingUpload = null;
 
-function saveFile(files,type){
-for(let f of files){
-let name=prompt("Name")||f.name;
-let deleteTime=prompt("Auto delete yyyy-mm-dd hh:mm")||"";
-db.transaction("media","readwrite").objectStore("media")
-.put({id:Date.now()+Math.random(),blob:f,type,name:name.toLowerCase(),deleted:false,deleteTime});
-}
-load();
+function saveFile(files, type, input) {
+  const selectedFiles = Array.from(files || []);
+  if (!selectedFiles.length) return;
+
+  pendingUpload = { files: selectedFiles, type, input };
+  uploadName.value = selectedFiles.length === 1 ? selectedFiles[0].name : '';
+  uploadName.disabled = selectedFiles.length > 1;
+  uploadName.placeholder = selectedFiles.length > 1 ? 'Original file names will be used' : 'File name';
+  uploadDeleteTime.value = '';
+  uploadSummary.textContent = selectedFiles.length === 1
+    ? `Ready to add ${selectedFiles[0].name}`
+    : `Ready to add ${selectedFiles.length} selected files`;
+  uploadModal.classList.add('open');
+  if (!uploadName.disabled) uploadName.focus();
 }
 
-/* SHARE FIX FINAL */
-function shareFile(file, name) {
-  // Native share (mobile-friendly)
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    navigator.share({
-      title: name,
-      files: [file]
-    }).catch(() => {});
+function closeUploadModal() {
+  uploadModal.classList.remove('open');
+  if (pendingUpload && pendingUpload.input) pendingUpload.input.value = '';
+  pendingUpload = null;
+  confirmUploadBtn.disabled = false;
+  confirmUploadBtn.textContent = 'Save to Album';
+}
+
+cancelUploadBtn.onclick = closeUploadModal;
+uploadModal.onclick = event => {
+  if (event.target === uploadModal) closeUploadModal();
+};
+
+confirmUploadBtn.onclick = () => {
+  if (!pendingUpload) return;
+  if (!db) {
+    alert('The album is still starting. Please wait a moment and press Save again.');
     return;
   }
 
-  // Fallback for desktop: download the file
+  const customName = uploadName.value.trim();
+  if (pendingUpload.files.length === 1 && !customName) {
+    uploadName.focus();
+    return;
+  }
+
+  const deleteTime = uploadDeleteTime.value.replace('T', ' ');
+  confirmUploadBtn.disabled = true;
+  confirmUploadBtn.textContent = 'Saving...';
+
+  const transaction = db.transaction('media', 'readwrite');
+  const store = transaction.objectStore('media');
+  pendingUpload.files.forEach((file, index) => {
+    const name = pendingUpload.files.length === 1 ? customName : file.name;
+    store.put({
+      id: Date.now() + index + Math.random(),
+      blob: file,
+      type: pendingUpload.type,
+      name: name.toLowerCase(),
+      deleted: false,
+      favorite: false,
+      deleteTime
+    });
+  });
+
+  transaction.oncomplete = () => {
+    closeUploadModal();
+    load();
+  };
+  transaction.onerror = () => {
+    confirmUploadBtn.disabled = false;
+    confirmUploadBtn.textContent = 'Save to Album';
+    alert('The selected files could not be saved. Please try again.');
+  };
+};
+
+function downloadFile(file, name) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(file);
-  a.download = name;
+  a.download = name || 'album-file';
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }, 1500);
+}
 
-  // Optional: revoke URL after a short delay
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+async function shareFile(blob, name) {
+  const safeName = name || 'album-file';
+  const shareableFile = blob instanceof File
+    ? new File([blob], safeName, { type: blob.type || 'application/octet-stream' })
+    : new File([blob], safeName, { type: blob.type || 'application/octet-stream' });
+
+  try {
+    if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [shareableFile] }))) {
+      await navigator.share({ title: safeName, files: [shareableFile] });
+      return;
+    }
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+  }
+
+  downloadFile(shareableFile, safeName);
+}
+
+function updateMediaItem(item, action) {
+  if (!db) return;
+  const transaction = db.transaction('media', 'readwrite');
+  const store = transaction.objectStore('media');
+  if (action === 'deleteForever') store.delete(item.id);
+  else store.put(item);
+  transaction.oncomplete = load;
+  transaction.onerror = () => alert('The album could not update this item. Please try again.');
+}
+
+function toggleFavorite(item) {
+  item.favorite=!item.favorite;
+  updateMediaItem(item,'update');
+}
+
+function toggleFavoritesFilter(type,button) {
+  favoriteFilters[type]=!favoriteFilters[type];
+  button.classList.toggle('active',favoriteFilters[type]);
+  button.textContent=favoriteFilters[type] ? 'Show All Items' : 'Show Favorites Only';
+  load();
+}
+
+function getMusicTracks() {
+  return Array.from(document.querySelectorAll('#musicPreview audio'));
+}
+
+function playMusicTrack(track) {
+  if(!track)return;
+  getMusicTracks().forEach(audio=>{if(audio!==track)audio.pause();});
+  track.playbackRate=musicSettings.speed;
+  currentAudio=track;
+  track.play().catch(()=>{});
+}
+
+function playRelativeTrack(step) {
+  const tracks=getMusicTracks();
+  if(!tracks.length)return;
+  let index=tracks.indexOf(currentAudio);
+  if(index<0)index=step>0 ? -1 : 0;
+  index=(index+step+tracks.length)%tracks.length;
+  playMusicTrack(tracks[index]);
+}
+
+function setMusicRepeat(mode) {
+  musicSettings.repeat=mode;
+}
+
+function toggleMusicShuffle(button) {
+  musicSettings.shuffle=!musicSettings.shuffle;
+  button.classList.toggle('active',musicSettings.shuffle);
+  button.textContent=musicSettings.shuffle ? 'Shuffle: On' : 'Shuffle: Off';
+}
+
+function setMusicSpeed(value) {
+  musicSettings.speed=Number(value)||1;
+  getMusicTracks().forEach(audio=>audio.playbackRate=musicSettings.speed);
+}
+
+function handleMusicEnded(finishedTrack) {
+  const tracks=getMusicTracks();
+  if(!tracks.length)return;
+  if(musicSettings.repeat==='one'){
+    finishedTrack.currentTime=0;
+    playMusicTrack(finishedTrack);
+    return;
+  }
+  let nextIndex;
+  if(musicSettings.shuffle && tracks.length>1){
+    const currentIndex=tracks.indexOf(finishedTrack);
+    do{nextIndex=Math.floor(Math.random()*tracks.length);}while(nextIndex===currentIndex);
+  }else{
+    nextIndex=tracks.indexOf(finishedTrack)+1;
+    if(nextIndex>=tracks.length){
+      if(musicSettings.repeat!=='all')return;
+      nextIndex=0;
+    }
+  }
+  playMusicTrack(tracks[nextIndex]);
+}
+
+function startMusicSleepTimer() {
+  cancelMusicSleepTimer(false);
+  const minutes=Number(document.getElementById('sleepMinutes').value);
+  const status=document.getElementById('sleepTimerStatus');
+  status.textContent=`Music will stop in ${minutes} minutes.`;
+  musicSleepTimer=setTimeout(()=>{
+    stopAll();
+    musicSleepTimer=null;
+    status.textContent='Sleep timer finished. Music stopped.';
+  },minutes*60*1000);
+}
+
+function cancelMusicSleepTimer(showMessage=true) {
+  if(musicSleepTimer)clearTimeout(musicSleepTimer);
+  musicSleepTimer=null;
+  const status=document.getElementById('sleepTimerStatus');
+  if(status && showMessage)status.textContent='Sleep timer is off.';
 }
 /* LOAD */
 function load(){
+if(!db)return;
+const imgPreview=document.getElementById('imgPreview');
+const vidPreview=document.getElementById('vidPreview');
+const musicPreview=document.getElementById('musicPreview');
+const docPreview=document.getElementById('docPreview');
+const trashPreview=document.getElementById('trashPreview');
 imgPreview.innerHTML=vidPreview.innerHTML=musicPreview.innerHTML=docPreview.innerHTML=trashPreview.innerHTML="";
 let now=new Date();
 
@@ -644,6 +1619,11 @@ db.transaction("media","readwrite").objectStore("media").put(i);
 }
 }
 
+if(!i.deleted && favoriteFilters[i.type] && !i.favorite){
+  c.continue();
+  return;
+}
+
 let url=URL.createObjectURL(i.blob);
 let box=document.createElement("div");
 let title=document.createElement("p");title.innerText=i.name;
@@ -651,7 +1631,17 @@ let title=document.createElement("p");title.innerText=i.name;
 let el;
 if(i.type==="image"){el=document.createElement("img");el.src=url;}
 if(i.type==="video"){el=document.createElement("video");el.src=url;el.controls=true;}
-if(i.type==="music"){el=document.createElement("audio");el.src=url;el.controls=true;}
+if(i.type==="music"){
+  el=document.createElement("audio");
+  el.src=url;
+  el.controls=true;
+  el.playbackRate=musicSettings.speed;
+  el.onplay=()=>{
+    getMusicTracks().forEach(audio=>{if(audio!==el)audio.pause();});
+    currentAudio=el;
+  };
+  el.onended=()=>handleMusicEnded(el);
+}
 if(i.type==="doc"){
 
   el=document.createElement("div");
@@ -672,29 +1662,47 @@ if(i.type==="doc"){
       </button>
     </div>
   `;
+  el.textContent='';
+  const docInfo=document.createElement('div');
+  docInfo.textContent='Document: '+i.name;
+  const openDocButton=document.createElement('button');
+  openDocButton.type='button';
+  openDocButton.textContent='Open Document';
+  openDocButton.onclick=(event)=>{event.preventDefault();event.stopPropagation();openDoc(i.blob,i.name);};
+  el.append(docInfo,openDocButton);
 }
 
 let del=document.createElement("button");
+del.type="button";
 del.innerText="Delete";
-del.onclick=()=>{i.deleted=true;db.transaction("media","readwrite").objectStore("media").put(i);load();};
+del.onclick=(event)=>{event.preventDefault();event.stopPropagation();i.deleted=true;updateMediaItem(i,'update');};
 
 let share=document.createElement("button");
+share.type="button";
 share.innerText="Share";
-share.onclick=()=>shareFile(i.blob,i.name);
+share.onclick=(event)=>{event.preventDefault();event.stopPropagation();shareFile(i.blob,i.name);};
+
+let favorite=document.createElement("button");
+favorite.type="button";
+favorite.className='favorite-button'+(i.favorite?' active':'');
+favorite.innerText=i.favorite?'Favorited':'Add Favorite';
+favorite.onclick=(event)=>{event.preventDefault();event.stopPropagation();toggleFavorite(i);};
 
 let restore=document.createElement("button");
+restore.type="button";
 restore.innerText="Restore";
-restore.onclick=()=>{i.deleted=false;db.transaction("media","readwrite").objectStore("media").put(i);load();};
+restore.onclick=(event)=>{event.preventDefault();event.stopPropagation();i.deleted=false;updateMediaItem(i,'update');};
 
 let forever=document.createElement("button");
+forever.type="button";
 forever.innerText="Delete Forever";
-forever.onclick=()=>{db.transaction("media","readwrite").objectStore("media").delete(i.id);load();};
+forever.onclick=(event)=>{event.preventDefault();event.stopPropagation();if(confirm('Delete this item forever?'))updateMediaItem(i,'deleteForever');};
 
 if(i.deleted){
 box.append(title,el,restore,forever);
 trashPreview.append(box);
 }else{
-box.append(title,el,del,share);
+box.append(title,el,favorite,del,share);
 if(i.type==="image") imgPreview.append(box);
 if(i.type==="video") vidPreview.append(box);
 if(i.type==="music") musicPreview.append(box);
@@ -713,10 +1721,10 @@ let c=e.target.result;if(!c)return;
 let i=c.value;
 if(!i.deleted && i.type===type && i.name.includes(name)){
 let url=URL.createObjectURL(i.blob);
-viewerContent.innerHTML= type==="image"
+viewerContentEl.innerHTML= type==="image"
 ? `<img src="${url}">`
 : `<video id="v" src="${url}" autoplay controls></video>`;
-viewer.style.display="flex";
+viewerEl.style.display="flex";
 currentVideo=document.getElementById("v");
 return;
 }
@@ -730,7 +1738,15 @@ if(currentAudio){currentAudio.pause();currentAudio=null;}
 if(currentVideo){currentVideo.pause();}
 closeViewer();
 }
-function closeViewer(){viewer.style.display="none";}
+function closeViewer(){
+  viewerEl.style.display="none";
+  viewerContentEl.innerHTML='';
+  currentVideo=null;
+  if(currentViewerObjectUrl){
+    URL.revokeObjectURL(currentViewerObjectUrl);
+    currentViewerObjectUrl=null;
+  }
+}
 
 /* MUSIC */
 function playMusic(name){
@@ -911,52 +1927,50 @@ function showError(message){
         ${message}
     `;
 }
-function openDoc(url,name){
+async function openDoc(blob,name){
+  closeViewer();
+  const safeName=name || 'document';
+  const ext=safeName.includes('.') ? safeName.split('.').pop().toLowerCase() : '';
+  const textTypes=['txt','html','css','js','json','csv','md','xml'];
 
-  const ext = name.split(".").pop().toLowerCase();
-
-  // Open PDFs directly
-  if(ext === "pdf"){
-    window.open(url,"_blank");
+  if(textTypes.includes(ext) || (blob.type && blob.type.startsWith('text/'))){
+    try{
+      const data=await blob.text();
+      const textView=document.createElement('pre');
+      textView.className='document-text-view';
+      textView.textContent=data;
+      viewerContentEl.appendChild(textView);
+      viewerEl.style.display='flex';
+    }catch(error){
+      alert('This document could not be read.');
+    }
     return;
   }
 
-  // Open text files
-  if(
-    ext === "txt" ||
-    ext === "html" ||
-    ext === "css" ||
-    ext === "js" ||
-    ext === "json"
-  ){
-    fetch(url)
-    .then(res=>res.text())
-    .then(data=>{
-
-      viewerContent.innerHTML = `
-        <div style="
-          width:90%;
-          height:90%;
-          overflow:auto;
-          background:white;
-          color:black;
-          padding:20px;
-          border-radius:10px;
-          white-space:pre-wrap;
-        ">
-          ${data.replace(/</g,"&lt;")}
-        </div>
-      `;
-
-      viewer.style.display="flex";
-
-    });
-
+  if(ext==='pdf' || blob.type==='application/pdf'){
+    currentViewerObjectUrl=URL.createObjectURL(blob);
+    const frame=document.createElement('iframe');
+    frame.className='document-frame';
+    frame.src=currentViewerObjectUrl;
+    frame.title=safeName;
+    viewerContentEl.appendChild(frame);
+    viewerEl.style.display='flex';
     return;
   }
 
-  // Other docs
-  window.open(url,"_blank");
+  const fallback=document.createElement('div');
+  fallback.className='document-fallback';
+  const title=document.createElement('h2');
+  title.textContent=safeName;
+  const message=document.createElement('p');
+  message.textContent='This file type cannot be previewed inside this browser. The document remains safely stored in your album.';
+  const closeButton=document.createElement('button');
+  closeButton.type='button';
+  closeButton.textContent='Close Preview';
+  closeButton.onclick=(event)=>{event.preventDefault();event.stopPropagation();closeViewer();};
+  fallback.append(title,message,closeButton);
+  viewerContentEl.appendChild(fallback);
+  viewerEl.style.display='flex';
 }
 </script>
 </body>
