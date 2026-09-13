@@ -296,6 +296,34 @@ canvas{
     color:#007AFF;
     font-weight:bold;
 }
+
+.address-details {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+  text-align: left;
+}
+
+.address-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.7fr) 1fr;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.address-label {
+  color: #bae6fd;
+  font-weight: 700;
+}
+
+.address-value {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .address-row { grid-template-columns: 1fr; gap: 3px; }
+}
 .container h2,
 .container p{
     color:white;
@@ -1873,14 +1901,49 @@ async function success(position){
         );
 
         const data = await response.json();
+        const address = data.address || {};
+        const addressFields = [
+            ["Building", address.building],
+            ["Door number", address.house_number],
+            ["Colony / Colony number", address.colony || address.neighbourhood],
+            ["Residential area", address.residential],
+            ["Suburb", address.suburb],
+            ["Block / Sector", address.block],
+            ["Quarter", address.quarter],
+            ["Line / Road", address.road],
+            ["Pedestrian street", address.pedestrian],
+            ["Hamlet", address.hamlet],
+            ["Allotments", address.allotments],
+            ["City district", address.city_district],
+            ["District", address.district],
+            ["County", address.county],
+            ["Municipality", address.municipality],
+            ["State district", address.state_district],
+            ["Town", address.town],
+            ["City", address.city],
+            ["Village", address.village],
+            ["State", address.state],
+            ["Postal code", address.postcode],
+            ["Country", address.country],
+            ["Country code", address.country_code]
+        ].filter(([, value]) => value);
 
         resultDiv.className = "success";
 
         resultDiv.innerHTML = `
             <h3>✅ Address Found</h3>
-            <br>
 
-            ${data.display_name}
+          <div class="address-details">
+            ${addressFields.map(([label, value]) => `
+              <div class="address-row">
+                <span class="address-label">${label}</span>
+                <span class="address-value">${escapeHtml(value)}</span>
+              </div>
+            `).join("")}
+          </div>
+
+          <strong>Complete address:</strong><br>
+          ${escapeHtml(data.display_name || "Address details unavailable")}
 
             <br><br>
 
@@ -1903,6 +1966,16 @@ async function success(position){
 
     }
 }
+
+  function escapeHtml(value){
+    return String(value).replace(/[&<>"']/g, character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    })[character]);
+  }
 
 function fail(error){
 
